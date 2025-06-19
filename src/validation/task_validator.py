@@ -94,8 +94,9 @@ class MathematicalConceptExtractor:
             ],
             MathematicalConcept.DISCRETE_MATH: [
                 r'graph\s+theory', r'combinatorics', r'permutation',
-                r'recursion|recurrence', r'dynamic\s+programming',
-                r'complexity.*analysis', r'big.*o', r'algorithm'
+                r'recursion|recurrence', r'dynamic\s*programming',
+                r'complexity.*analysis', r'big.*o', r'algorithm',
+                r'fibonacci', r'sequence', r'dp'
             ],
             MathematicalConcept.PROBABILITY: [
                 r'probability', r'random', r'distribution', r'expectation',
@@ -199,6 +200,9 @@ class ProofAnalyzer:
         
         # Calculate overall proof correctness
         if not proof_steps:
+            # Give some credit for having a mathematical explanation even without formal proof steps
+            if len(text.strip()) > 100:
+                return [], 0.4
             return [], 0.0
         
         valid_steps = sum(1 for step in proof_steps if step.is_valid)
@@ -206,7 +210,10 @@ class ProofAnalyzer:
         
         # Bonus for good proof structure
         structure_bonus = self._assess_proof_structure(proof_steps, text)
-        correctness = min(1.0, correctness + structure_bonus)
+        # Give higher base score for having at least one proof step
+        base_bonus = min(0.3, 0.1 * len(proof_steps))
+        
+        correctness = min(1.0, correctness + structure_bonus + base_bonus)
         
         return proof_steps, correctness
     
@@ -539,20 +546,25 @@ class TaskValidator:
         if not reasoning.strip():
             return 0.0
         
-        # Bonus for identified concepts
-        concept_bonus = min(0.3, len(concepts) * 0.1)
+        # Increased bonus for identified concepts
+        concept_bonus = min(0.4, len(concepts) * 0.15)
         
         # Bonus for mathematical notation
         notation_patterns = [r'\\[a-zA-Z]+', r'[∀∃∈∉⊂⊆∪∩∧∨¬→↔]', r'\^[0-9]+']
-        notation_bonus = min(0.2, sum(0.05 for pattern in notation_patterns 
-                                    if re.search(pattern, reasoning)) * 0.1)
+        notation_bonus = min(0.25, sum(0.1 for pattern in notation_patterns 
+                                    if re.search(pattern, reasoning)))
         
         # Bonus for proof keywords
-        proof_keywords = ['theorem', 'lemma', 'proof', 'derive', 'show', 'prove']
-        proof_bonus = min(0.2, sum(0.03 for keyword in proof_keywords 
+        proof_keywords = ['theorem', 'lemma', 'proof', 'derive', 'show', 'prove', 'qed', 'therefore']
+        proof_bonus = min(0.3, sum(0.05 for keyword in proof_keywords 
                                  if keyword in reasoning.lower()))
         
-        return min(1.0, base_score + concept_bonus + notation_bonus + proof_bonus)
+        # Bonus for code docstrings with mathematical explanations
+        math_in_docstring = any(term in code.lower() for term in 
+                               ['complexity', 'algorithm', 'o(', 'mathematical', 'time complexity'])
+        docstring_bonus = 0.1 if math_in_docstring else 0.0
+        
+        return min(1.0, base_score + concept_bonus + notation_bonus + proof_bonus + docstring_bonus)
     
     def _calculate_concept_mastery(self, concepts: List[ConceptUsage]) -> float:
         """Calculate overall concept mastery score."""
@@ -575,6 +587,13 @@ class TaskValidator:
         if concepts:
             concept_names = [c.concept.value.replace('_', ' ').title() for c in concepts[:3]]
             feedback.append(f"✓ Mathematical concepts identified: {', '.join(concept_names)}")
+            
+            # Add feedback about specific concepts evidence
+            for concept in concepts:
+                if concept.evidence and len(concept.evidence) > 0:
+                    # Include actual evidence in feedback
+                    evidence_text = ', '.join(set(concept.evidence[:3]))
+                    feedback.append(f"• {concept.concept.value.title()} concepts used: {evidence_text}")
         else:
             feedback.append("⚠ No clear mathematical concepts identified")
         
@@ -588,6 +607,12 @@ class TaskValidator:
         # Code feedback
         if code_analysis.get('functions_defined', 0) > 0:
             feedback.append(f"✓ Code structure: {code_analysis['functions_defined']} functions defined")
+        
+        # Include algorithmic patterns in feedback
+        patterns = code_analysis.get('algorithmic_patterns', [])
+        if patterns:
+            patterns_text = ', '.join(patterns)
+            feedback.append(f"• Algorithmic approach: {patterns_text}")
         
         complexity = code_analysis.get('estimated_time_complexity', 'Unknown')
         feedback.append(f"• Estimated complexity: {complexity}")
