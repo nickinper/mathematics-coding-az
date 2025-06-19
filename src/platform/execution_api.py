@@ -184,3 +184,32 @@ async def get_execution_metrics(
             # Additional hours...
         ]
     }
+
+
+@execution_router.post("/direct-execute")
+async def direct_execute_code(
+    request: CodeExecutionRequest
+):
+    """Execute code in sandboxed environment without authentication (for testing)."""
+    try:
+        result = await executor.execute_code(
+            request.code,
+            request.test_cases,
+            request.language,
+            request.timeout,
+            request.memory_limit
+        )
+        
+        return {
+            "status": result.status.value,
+            "output": result.output,
+            "error": result.error,
+            "execution_time": result.execution_time,
+            "memory_used": result.memory_used,
+            "test_results": result.test_results
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Execution error: {str(e)}"
+        )

@@ -1,0 +1,65 @@
+execution:
+  languages:
+    python:
+      image: "mathcoding-executor:latest"
+      timeout: 5.0
+      memory_limit: "256m"
+      cpu_limit: 0.5
+      
+    javascript:
+      image: "mathcoding-executor:node"
+      timeout: 5.0
+      memory_limit: "256m"
+      cpu_limit: 0.5
+
+  security:
+    blocked_imports:
+      - os
+      - sys
+      - subprocess
+      - socket
+      - requests
+      - urllib
+      - threading
+      - multiprocessing
+      - shutil
+      - ctypes
+      - distutils
+      - setuptools
+      - pathlib
+      
+    dangerous_builtins:
+      - eval
+      - exec
+      - compile
+      - __import__
+      - open
+      - globals
+      - locals
+      - getattr
+      - setattr
+      - delattr
+
+    blocked_functions:
+      - breakpoint
+      - help
+      - dir
+      - vars
+      - memoryview
+      - staticmethod
+      - classmethod
+      - property
+
+  limits:
+    max_output_size: 1048576  # 1MB
+    max_containers: 10
+    cleanup_interval: 300  # 5 minutes
+    rate_limit: 10  # requests per minute
+    
+  network:
+    enabled: false
+    allowed_hosts: []
+    
+  filesystem:
+    read_only: true
+    allowed_paths: []

@@ -8,6 +8,8 @@ import uvicorn
 from pathlib import Path
 
 from .api import challenge_router, submission_router, user_router
+from .execution_api import execution_router
+from .auth_routes import auth_router
 from .database import engine, Base
 
 
@@ -37,6 +39,8 @@ def create_app() -> FastAPI:
     app.include_router(challenge_router, prefix="/api/challenges", tags=["challenges"])
     app.include_router(submission_router, prefix="/api/submissions", tags=["submissions"])
     app.include_router(user_router, prefix="/api/users", tags=["users"])
+    app.include_router(execution_router, prefix="/api/execution", tags=["execution"])
+    app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
     
     # Serve static files
     static_path = Path(__file__).parent / "static"

@@ -56,6 +56,7 @@ ChartJS.register(
 
 // Helper function to capitalize domain names
 const capitalizeDomain = (domain) => {
+  if (!domain) return '';  // Add null check
   return domain
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
