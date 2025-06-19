@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+# Install only essential packages
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for running code
+RUN useradd -m -s /bin/bash coderunner
+
+# Install common Python packages for math/algorithms
+RUN pip install --no-cache-dir \
+    numpy==1.24.3 \
+    scipy==1.11.1 \
+    sympy==1.12 \
+    matplotlib==3.7.1 \
+    pandas==2.0.2 \
+    networkx==3.1
+
+# Set working directory
+WORKDIR /code
+
+# Switch to non-root user
+USER coderunner
+
+# Default command
+CMD ["python"]

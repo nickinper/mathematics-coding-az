@@ -30,7 +30,9 @@ import {
   LightMode as LightModeIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
-  Help as HelpIcon
+  Help as HelpIcon,
+  Code as CodeIcon,
+  AutoFixHigh as AutoFixHighIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
@@ -72,6 +74,11 @@ export default function Layout() {
     { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
   ];
   
+  const advancedItems = [
+    { text: 'Code Executor', icon: <CodeIcon />, path: '/executor' },
+    { text: 'Task Generator', icon: <AutoFixHighIcon />, path: '/task-generator' },
+  ];
+  
   const drawer = (
     <div>
       <Toolbar>
@@ -82,6 +89,31 @@ export default function Layout() {
       <Divider />
       <List>
         {navigationItems.map((item) => (
+          <ListItem key={item.text} disablePadding>
+            <ListItemButton 
+              onClick={() => {
+                navigate(item.path);
+                if (isMobile) {
+                  setMobileOpen(false);
+                }
+              }}
+            >
+              <ListItemIcon>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold', pl: 2 }}>
+            ADVANCED TOOLS
+          </Typography>
+        </ListItem>
+        {advancedItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton 
               onClick={() => {

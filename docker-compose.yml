@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mathcoding
+      - SECRET_KEY=${SECRET_KEY:-d82f0f1a1e1b7b2c4f9a4d1e9d1f9c7e4f1a2d3f4e7d8c9a8d7e4f1a2d3f4e7}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+      - redis
+    networks:
+      - mathcoding-net
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: ../../docker/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    networks:
+      - mathcoding-net
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mathcoding
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mathcoding-net
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - mathcoding-net
+
+  executor:
+    image: mathcoding-executor:latest
+    deploy:
+      replicas: 0  # Created on-demand
+    networks:
+      - none  # No network access
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
+
+networks:
+  mathcoding-net:
+    driver: bridge
+  none:
+    driver: null
+
+volumes:
+  postgres_data:
+  redis_data:

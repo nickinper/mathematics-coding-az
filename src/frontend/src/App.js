@@ -10,6 +10,8 @@ import ChallengeBrowser from './pages/ChallengeBrowser';
 import ChallengeView from './pages/ChallengeView';
 import Profile from './pages/Profile';
 import Progress from './pages/Progress';
+import Executor from './pages/Executor';
+import TaskGenerator from './pages/TaskGenerator';
 import NotFound from './pages/NotFound';
 
 // Components
@@ -41,6 +43,8 @@ function App() {
           <Route path="/challenges/:id" element={<ChallengeView />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/progress" element={<Progress />} />
+          <Route path="/executor" element={<Executor />} />
+          <Route path="/task-generator" element={<TaskGenerator />} />
         </Route>
         
         {/* Redirect and 404 */}

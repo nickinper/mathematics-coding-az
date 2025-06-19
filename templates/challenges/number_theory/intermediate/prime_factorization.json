@@ -1,0 +1,43 @@
+{
+  "title": "Prime Factorization Challenge",
+  "description_template": "# {{title}}\n\n## Problem Statement\n\nFind the prime factorization of the number {{number}}.\n\n## Mathematical Foundation\n\nA prime number is a natural number greater than 1 that is not a product of two smaller natural numbers.\nThe prime factorization of a number is the product of prime numbers that equals the original number.\n\n## Task\n\nYour task is to implement a function `prime_factorize(n)` that:\n\n1. Takes an integer `n` as input\n2. Returns a list of prime factors of `n` in ascending order\n3. For repeated prime factors, the prime should appear multiple times in the result\n\n## Example\n\n```\nInput: 60\nOutput: [2, 2, 3, 5]\n```\n\nExplanation: 60 = 2 × 2 × 3 × 5\n\n## Requirements\n\n1. Your solution should handle inputs up to 10^9\n2. Time complexity analysis is required\n3. Explain the mathematical principles behind your approach",
+  "parameters": {
+    "number": {
+      "type": "integer",
+      "min": 100,
+      "max": 10000000,
+      "description": "The number to factorize"
+    },
+    "title": {
+      "type": "string",
+      "options": [
+        "Prime Factorization Challenge",
+        "Finding Prime Factors",
+        "Prime Decomposition Problem"
+      ],
+      "description": "The title of the challenge"
+    }
+  },
+  "requirements": [
+    {
+      "concept": "Prime Numbers",
+      "description": "Understanding of prime numbers and their properties",
+      "proof_required": true
+    },
+    {
+      "concept": "Factorization Algorithms",
+      "description": "Knowledge of efficient factorization techniques",
+      "proof_required": false,
+      "complexity_analysis": true
+    }
+  ],
+  "test_case_generator": {
+    "function_name": "prime_factorize",
+    "test_cases": [
+      {"input": 60, "expected_output": [2, 2, 3, 5]},
+      {"input": 100, "expected_output": [2, 2, 5, 5]},
+      {"input": "{{number}}", "expected_output": "calculated"},
+      {"input": "{{number * 2}}", "expected_output": "calculated"}
+    ]
+  }
+}
