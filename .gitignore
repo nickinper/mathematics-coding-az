@@ -84,3 +84,7 @@ node_modules/
 # Cache
 .cache/
 **/.cache/
+
+# Training data and reports
+training_data/
+report_*.json
