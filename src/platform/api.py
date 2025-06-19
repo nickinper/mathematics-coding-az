@@ -12,6 +12,7 @@ from .models import User, Challenge as ChallengeModel, Submission
 from src.core.challenge import ChallengeResult
 from src.core.failure_analysis import FailureAnalyzer
 from src.assessment.scoring import ScoringEngine
+from src.validation.task_validator import TaskValidator
 from src.challenges.level1.number_theory import RSAChallenge, ModularExponentiationChallenge
 
 
@@ -68,6 +69,7 @@ user_router = APIRouter()
 # Initialize services
 failure_analyzer = FailureAnalyzer()
 scoring_engine = ScoringEngine()
+task_validator = TaskValidator()
 
 # Available challenges (in a real system, these would be loaded from database)
 AVAILABLE_CHALLENGES = {
@@ -348,6 +350,64 @@ async def list_submissions(
     
     submissions = query.limit(limit).all()
     return submissions
+
+
+@submission_router.post("/{submission_id}/validate-advanced")
+async def validate_submission_detailed(submission_id: int, db: Session = Depends(get_db)):
+    """Enhanced validation using TaskValidator for comprehensive mathematical analysis."""
+    submission = db.query(Submission).filter(Submission.id == submission_id).first()
+    
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    # Create a submission-like object for the validator
+    class SubmissionWrapper:
+        def __init__(self, code: str, reasoning: str):
+            self.code = code
+            self.mathematical_reasoning = reasoning
+    
+    wrapper = SubmissionWrapper(submission.code, submission.mathematical_reasoning or "")
+    
+    # Run comprehensive validation
+    result = task_validator.validate_mathematical_correctness(wrapper)
+    
+    return {
+        "submission_id": submission_id,
+        "validation_result": {
+            "overall_score": result.overall_score,
+            "scores": {
+                "mathematical_rigor": result.mathematical_rigor,
+                "proof_correctness": result.proof_correctness,
+                "code_elegance": result.code_elegance,
+                "concept_mastery": result.concept_mastery
+            },
+            "concepts_identified": [
+                {
+                    "concept": c.concept.value,
+                    "confidence": c.confidence,
+                    "evidence": c.evidence,
+                    "mastery_level": c.mastery_level
+                }
+                for c in result.concepts_identified
+            ],
+            "proof_analysis": {
+                "steps_found": len(result.proof_steps),
+                "valid_steps": sum(1 for step in result.proof_steps if step.is_valid),
+                "proof_steps": [
+                    {
+                        "statement": step.statement,
+                        "justification": step.justification,
+                        "is_valid": step.is_valid,
+                        "confidence": step.confidence
+                    }
+                    for step in result.proof_steps
+                ]
+            },
+            "code_analysis": result.code_analysis,
+            "feedback": result.feedback,
+            "suggestions": result.suggestions
+        }
+    }
 
 
 @user_router.get("/{user_id}", response_model=UserResponse)
