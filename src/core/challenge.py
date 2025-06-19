@@ -25,6 +25,12 @@ class MathematicalDomain(Enum):
     ABSTRACT_ALGEBRA = "abstract_algebra"
     TOPOLOGY = "topology"
     FUNCTIONAL_ANALYSIS = "functional_analysis"
+    DIFFERENTIAL_GEOMETRY = "differential_geometry"
+    CATEGORY_THEORY = "category_theory"
+    MODEL_THEORY = "model_theory"
+    INFORMATION_THEORY = "information_theory"
+    GAME_THEORY = "game_theory"
+    MATHEMATICAL_LOGIC = "mathematical_logic"
 
 
 @dataclass

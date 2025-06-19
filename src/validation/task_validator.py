@@ -80,7 +80,9 @@ class MathematicalConceptExtractor:
             MathematicalConcept.NUMBER_THEORY: [
                 r'prime\s+number', r'modular\s+arithmetic', r'gcd|lcm',
                 r'fermat.*theorem', r'euler.*theorem', r'chinese.*remainder',
-                r'divisibility', r'congruence', r'factorization'
+                r'divisibility', r'congruence', r'factorization', r'modular',
+                r'exponentiation', r'mod\s+modulus', r'binary\s+exponentiation',
+                r'modulus', r'rsa', r'cryptography', r'log\s+exponent'
             ],
             MathematicalConcept.LINEAR_ALGEBRA: [
                 r'matrix|matrices', r'vector', r'eigenvalue|eigenvector',
@@ -200,8 +202,10 @@ class ProofAnalyzer:
         
         # Calculate overall proof correctness
         if not proof_steps:
-            # Give some credit for having a mathematical explanation even without formal proof steps
-            if len(text.strip()) > 100:
+            # Give more credit for having a mathematical explanation even without formal proof steps
+            if len(text.strip()) > 200:
+                return [], 0.6
+            elif len(text.strip()) > 100:
                 return [], 0.4
             return [], 0.0
         
@@ -541,7 +545,7 @@ class TaskValidator:
     def _calculate_mathematical_rigor(self, concepts: List[ConceptUsage], 
                                     reasoning: str, code: str) -> float:
         """Calculate mathematical rigor score."""
-        base_score = 0.3  # Base for having some reasoning
+        base_score = 0.25  # Base for having some reasoning
         
         if not reasoning.strip():
             return 0.0
@@ -550,7 +554,7 @@ class TaskValidator:
         concept_bonus = min(0.4, len(concepts) * 0.15)
         
         # Bonus for mathematical notation
-        notation_patterns = [r'\\[a-zA-Z]+', r'[∀∃∈∉⊂⊆∪∩∧∨¬→↔]', r'\^[0-9]+']
+        notation_patterns = [r'\\[a-zA-Z]+', r'[∀∃∈∉⊂⊆∪∩∧∨¬→↔]', r'\^[0-9]+', r'[a-z]\([a-z]\)']
         notation_bonus = min(0.25, sum(0.1 for pattern in notation_patterns 
                                     if re.search(pattern, reasoning)))
         
